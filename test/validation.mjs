@@ -262,6 +262,25 @@ describe('validation tests', () => {
         })
         .parse();
     });
+
+    it('does not reveal hidden implied options in failure messages', done => {
+      yargs(['--remote-debugging-port'])
+        .option('hidden-debug', {
+          hidden: true,
+          type: 'boolean',
+        })
+        .option('remote-debugging-port', {
+          type: 'string',
+        })
+        .implies('remote-debugging-port', 'hidden-debug')
+        .fail(msg => {
+          msg.should.match(implicationsFailedPattern);
+          msg.should.include('remote-debugging-port');
+          msg.should.not.include('hidden-debug');
+          return done();
+        })
+        .parse();
+    });
   });
 
   describe('conflicts', () => {

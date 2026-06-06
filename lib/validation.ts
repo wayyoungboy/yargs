@@ -349,6 +349,9 @@ export function validation(
 
   self.implications = function implications(argv) {
     const implyFail: string[] = [];
+    const hiddenOptions = yargs.getOptions().hiddenOptions;
+    const isHiddenOption = (key: KeyOrPos) =>
+      typeof key === 'string' && hiddenOptions.includes(key);
 
     Object.keys(implied).forEach(key => {
       const origKey = key;
@@ -359,7 +362,13 @@ export function validation(
         value = keyExists(argv, value);
 
         if (key && !value) {
-          implyFail.push(` ${origKey} -> ${origValue}`);
+          const visibleKeys = [
+            isHiddenOption(origKey) ? null : origKey,
+            isHiddenOption(origValue) ? null : origValue,
+          ]
+            .filter(Boolean)
+            .join(' -> ');
+          implyFail.push(visibleKeys ? ` ${visibleKeys}` : '');
         }
       });
     });
